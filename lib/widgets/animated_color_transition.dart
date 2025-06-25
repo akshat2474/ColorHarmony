@@ -8,13 +8,13 @@ class AnimatedColorTransition extends StatefulWidget {
   final Curve curve;
 
   const AnimatedColorTransition({
-    Key? key,
+    super.key,
     required this.fromColor,
     required this.toColor,
     required this.child,
     this.duration = const Duration(milliseconds: 500),
     this.curve = Curves.easeInOut,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedColorTransition> createState() => _AnimatedColorTransitionState();

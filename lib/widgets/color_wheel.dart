@@ -8,11 +8,11 @@ class ColorWheel extends StatefulWidget {
   final double size;
 
   const ColorWheel({
-    Key? key,
+    super.key,
     required this.onColorSelected,
     this.selectedColor,
     this.size = AppConstants.colorWheelSize,
-  }) : super(key: key);
+  });
 
   @override
   State<ColorWheel> createState() => _ColorWheelState();

@@ -7,7 +7,7 @@ import '../utils/constants.dart';
 import '../utils/color_utils.dart';
 
 class AccessibilityCheckerScreen extends StatefulWidget {
-  const AccessibilityCheckerScreen({Key? key}) : super(key: key);
+  const AccessibilityCheckerScreen({super.key});
 
   @override
   State<AccessibilityCheckerScreen> createState() => _AccessibilityCheckerScreenState();

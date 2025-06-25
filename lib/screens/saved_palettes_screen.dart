@@ -6,7 +6,7 @@ import '../services/palette_storage_service.dart';
 import '../utils/constants.dart';
 
 class SavedPalettesScreen extends StatefulWidget {
-  const SavedPalettesScreen({Key? key}) : super(key: key);
+  const SavedPalettesScreen({super.key});
 
   @override
   State<SavedPalettesScreen> createState() => _SavedPalettesScreenState();

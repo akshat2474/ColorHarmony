@@ -7,7 +7,7 @@ void main() {
 }
 
 class ColorHarmonyApp extends StatelessWidget {
-  const ColorHarmonyApp({Key? key}) : super(key: key);
+  const ColorHarmonyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

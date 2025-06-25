@@ -14,11 +14,11 @@ class PaletteDetailScreen extends StatefulWidget {
   final Color baseColor;
 
   const PaletteDetailScreen({
-    Key? key,
+    super.key,
     required this.colors,
     required this.harmonyType,
     required this.baseColor,
-  }) : super(key: key);
+  });
 
   @override
   State<PaletteDetailScreen> createState() => _PaletteDetailScreenState();

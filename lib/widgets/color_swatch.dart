@@ -12,14 +12,14 @@ class ColorSwatch extends StatefulWidget {
   final bool showCopyFeedback;
 
   const ColorSwatch({
-    Key? key,
+    super.key,
     required this.color,
     this.isSelected = false,
     this.onTap,
     this.showHex = true,
     this.size = AppConstants.colorSwatchSize,
     this.showCopyFeedback = true,
-  }) : super(key: key);
+  });
 
   @override
   State<ColorSwatch> createState() => _ColorSwatchState();

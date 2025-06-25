@@ -8,10 +8,10 @@ class HarmonySelector extends StatefulWidget {
   final Function(HarmonyType) onHarmonySelected;
 
   const HarmonySelector({
-    Key? key,
+    super.key,
     required this.selectedHarmony,
     required this.onHarmonySelected,
-  }) : super(key: key);
+  });
 
   @override
   State<HarmonySelector> createState() => _HarmonySelectorState();

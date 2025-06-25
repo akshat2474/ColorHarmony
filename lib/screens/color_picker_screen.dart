@@ -9,10 +9,10 @@ class ColorPickerScreen extends StatefulWidget {
   final Function(Color) onColorSelected;
 
   const ColorPickerScreen({
-    Key? key,
+    super.key,
     required this.initialColor,
     required this.onColorSelected,
-  }) : super(key: key);
+  });
 
   @override
   State<ColorPickerScreen> createState() => _ColorPickerScreenState();

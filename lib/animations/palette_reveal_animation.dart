@@ -6,11 +6,11 @@ class PaletteRevealAnimation extends StatefulWidget {
   final Function(int)? onColorRevealed;
 
   const PaletteRevealAnimation({
-    Key? key,
+    super.key,
     required this.colors,
     this.duration = const Duration(milliseconds: 300),
     this.onColorRevealed,
-  }) : super(key: key);
+  });
 
   @override
   State<PaletteRevealAnimation> createState() => _PaletteRevealAnimationState();

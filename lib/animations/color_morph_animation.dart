@@ -8,13 +8,13 @@ class ColorMorphAnimation extends StatefulWidget {
   final bool repeat;
 
   const ColorMorphAnimation({
-    Key? key,
+    super.key,
     required this.startColor,
     required this.endColor,
     required this.child,
     this.duration = const Duration(seconds: 2),
     this.repeat = false,
-  }) : super(key: key);
+  });
 
   @override
   State<ColorMorphAnimation> createState() => _ColorMorphAnimationState();

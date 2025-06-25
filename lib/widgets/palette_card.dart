@@ -14,14 +14,14 @@ class PaletteCard extends StatefulWidget {
   final VoidCallback? onFavoriteToggle;
 
   const PaletteCard({
-    Key? key,
+    super.key,
     required this.palette,
     this.onTap,
     this.onDelete,
     this.onEdit,
     this.isFavorite = false,
     this.onFavoriteToggle,
-  }) : super(key: key);
+  });
 
   @override
   State<PaletteCard> createState() => _PaletteCardState();

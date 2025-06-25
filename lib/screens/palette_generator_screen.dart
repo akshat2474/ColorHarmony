@@ -15,10 +15,10 @@ class PaletteGeneratorScreen extends StatefulWidget {
   final HarmonyType harmonyType;
 
   const PaletteGeneratorScreen({
-    Key? key,
+    super.key,
     required this.initialColors,
     required this.harmonyType,
-  }) : super(key: key);
+  });
 
   @override
   State<PaletteGeneratorScreen> createState() => _PaletteGeneratorScreenState();

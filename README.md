@@ -5,24 +5,12 @@
 ## Screenshots
 
 <div align="center">
-Main Interface
-
 <img src="screenshots/splash_screen.jpg" width="200" alt="Splash Screen"> 
 
 <img src="screenshots/palette_generator.jpg" width="200" alt="Palette Generator"> 
 
 <img src="screenshots/accessibility_checker.jpg" width="200" alt="Accessibility Checker"> 
 </div>
- 
-## Features
-
-- **Interactive Color Wheel** - Select base colors with precision using an animated color wheel
-- **Multiple Harmony Types** - Generate palettes using complementary, analogous, triadic, tetradic, split complementary, and monochromatic harmonies
-- **Real-time Generation** - Instant palette creation and live editing with smooth animations
-- **Palette Management** - Save, organize, search, and share your favorite color combinations
-- **Accessibility Checker** - WCAG compliance testing with contrast ratio analysis
-- **Advanced Color Picker** - Fine-tune colors with HSL sliders and preset swatches
-- **Export & Share** - Share palettes across platforms and copy hex codes instantly
 
 ## Installation
 
