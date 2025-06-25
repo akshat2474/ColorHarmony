@@ -1,8 +1,8 @@
 # Color Harmony 🎨
 
 **An advanced color palette generator app designed for designers and artists to create beautiful, accessible, and professional color palettes**<br><br>
-**Website: https://color-harmony-akshat.netlify.app/**
-
+**[Website Link](https://color-harmony-akshat.netlify.app/)**<br>
+**[App Download Link](https://github.com/akshat2474/ColorHarmony/releases/download/v1.0.0/color-harmony.apk)**
 ## Screenshots
 
 <div align="center">
