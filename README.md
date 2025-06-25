@@ -2,6 +2,20 @@
 
 **An advanced color palette generator app designed for designers and artists to create beautiful, accessible, and professional color palettes.**
 
+## Screenshots
+
+<div align="center">
+Main Interface
+
+<img src="screenshots/splash_screen.jpg" width="200" alt="Splash Screen"> 
+Palette Management
+
+<img src="screenshots/palette_generator.jpg" width="200" alt="Palette Generator"> 
+Accessibility Features
+
+<img src="screenshots/accessibility_checker.png" width="200" alt="Accessibility Checker"> 
+</div>
+ 
 ## Features
 
 - **Interactive Color Wheel** - Select base colors with precision using an animated color wheel
@@ -31,13 +45,37 @@ flutter run
 
 ```
 lib/
-├── main.dart
-├── models/                      # Data models
-├── screens/                     # UI screens
-├── widgets/                     # Reusable components
-├── services/                    # Business logic
-├── utils/                       # Utilities and helpers
-└── animations/                  # Custom animations
+├── main.dart                    
+├── models/                     
+│   ├── color_palette.dart      
+│   ├── color_harmony.dart       
+│   └── accessibility_result.dart 
+├── screens/                    
+│   ├── splash_screen.dart      
+│   ├── home_screen.dart        
+│   ├── palette_generator_screen.dart
+│   ├── palette_detail_screen.dart    
+│   ├── saved_palettes_screen.dart    
+│   ├── accessibility_checker_screen.dart 
+│   └── color_picker_screen.dart     
+├── widgets/                     
+│   ├── color_wheel.dart         
+│   ├── color_swatch.dart        
+│   ├── palette_card.dart      
+│   ├── harmony_selector.dart   
+│   └── animated_color_transition
+├── services/            
+│   ├── color_service.dart       
+│   ├── palette_storage_service.dart 
+│   └── accessibility_service.dart   
+├── utils/                      
+│   ├── color_utils.dart        
+│   ├── constants.dart       
+│   └── theme.dart   
+└── animations/             
+    ├── color_morph_animation.dart    
+    └── palette_reveal_animation.dart 
+
 ```
 
 ## Usage
@@ -83,5 +121,3 @@ This project is licensed under the MIT License.
 **Akshat Singh**
 - GitHub: [@akshat2474](https://github.com/akshat2474)
 - Email: akshat2474@gmail.com
-
-**Made with Flutter**
