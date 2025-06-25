@@ -22,7 +22,7 @@
 
 ### Setup
 ```bash
-git clone https://github.com/yourusername/color_harmony.git
+git clone https://github.com/akshat2474/color_harmony.git
 cd color_harmony
 flutter pub get
 flutter run
