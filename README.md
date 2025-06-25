@@ -8,10 +8,8 @@
 Main Interface
 
 <img src="screenshots/splash_screen.jpg" width="200" alt="Splash Screen"> 
-Palette Management
 
 <img src="screenshots/palette_generator.jpg" width="200" alt="Palette Generator"> 
-Accessibility Features
 
 <img src="screenshots/accessibility_checker.jpg" width="200" alt="Accessibility Checker"> 
 </div>
