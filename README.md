@@ -1,5 +1,8 @@
 # Color Harmony 🎨
 
+[Website Link](https://color-harmony-akshat.netlify.app/)
+[App Download Link](https://github.com/akshat2474/ColorHarmony/releases/download/v2.0.0/ColorHarmony.apk)
+
 ## Screenshots
 <div align="center">
 <img src="screenshots/home_screen.png" width="200"> 
