@@ -10,9 +10,9 @@ class AnimatedFightingScreen extends StatefulWidget {
   final List<Color>? initialColors;
 
   const AnimatedFightingScreen({
-    super.key,
+    Key? key,
     this.initialColors,
-  });
+  }) : super(key: key);
 
   @override
   State<AnimatedFightingScreen> createState() => _AnimatedFightingScreenState();
@@ -58,40 +58,43 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
   List<EnergyWave> _energyWaves = [];
   
   final GlobalKey _canvasKey = GlobalKey();
+  bool _isWeb = false;
+  double _screenWidth = 400;
 
   @override
   void initState() {
     super.initState();
     
+    _isWeb = identical(0, 0.0);
     _selectedColor = widget.initialColors?.first ?? Colors.black;
     
     _fightController = AnimationController(
-      duration: const Duration(seconds: 12),
+      duration: Duration(seconds: _isWeb ? 8 : 12),
       vsync: this,
     );
     
     _shakeController = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: Duration(milliseconds: _isWeb ? 200 : 400),
       vsync: this,
     );
     
     _particleController = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: Duration(seconds: _isWeb ? 2 : 3),
       vsync: this,
     );
     
     _pulseController = AnimationController(
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: _isWeb ? 1200 : 800),
       vsync: this,
     );
     
     _rotationController = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: Duration(seconds: _isWeb ? 3 : 2),
       vsync: this,
     );
     
     _scaleController = AnimationController(
-      duration: const Duration(milliseconds: 600),
+      duration: Duration(milliseconds: _isWeb ? 400 : 600),
       vsync: this,
     );
     
@@ -100,7 +103,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _fightController,
-      curve: const Interval(0.0, 0.35, curve: Curves.elasticOut),
+      curve: const Interval(0.2, 0.45, curve: Curves.easeOut),
     ));
     
     _rightFighterAnimation = Tween<double>(
@@ -108,15 +111,15 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
       end: 1.0,
     ).animate(CurvedAnimation(
       parent: _fightController,
-      curve: const Interval(0.65, 1.0, curve: Curves.elasticOut),
+      curve: const Interval(0.75, 1.0, curve: Curves.easeOut),
     ));
     
     _shakeAnimation = Tween<double>(
       begin: 0.0,
-      end: 25.0,
+      end: _isWeb ? 15.0 : 25.0,
     ).animate(CurvedAnimation(
       parent: _shakeController,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOut,
     ));
     
     _particleAnimation = Tween<double>(
@@ -128,11 +131,11 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
     ));
     
     _pulseAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.2,
+      begin: 0.9,
+      end: 1.1,
     ).animate(CurvedAnimation(
       parent: _pulseController,
-      curve: Curves.elasticInOut,
+      curve: Curves.easeInOut,
     ));
     
     _rotationAnimation = Tween<double>(
@@ -145,10 +148,10 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
     
     _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.3,
+      end: _isWeb ? 1.15 : 1.3,
     ).animate(CurvedAnimation(
       parent: _scaleController,
-      curve: Curves.elasticOut,
+      curve: Curves.easeOut,
     ));
     
     _backgroundAnimation = ColorTween(
@@ -161,8 +164,22 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
     
     _fightController.addListener(_updateFight);
     _particleController.addListener(_updateParticles);
-    _pulseController.repeat(reverse: true);
-    _rotationController.repeat();
+    
+    if (_isWeb) {
+      _pulseController.repeat(reverse: true, period: const Duration(milliseconds: 2400));
+      _rotationController.repeat(period: const Duration(seconds: 6));
+    } else {
+      _pulseController.repeat(reverse: true);
+      _rotationController.repeat();
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _screenWidth = MediaQuery.of(context).size.width;
+    _leftFighterX = 50;
+    _rightFighterX = _screenWidth - 150;
   }
 
   @override
@@ -178,62 +195,96 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
 
   void _updateFight() {
     if (_phase != FightingPhase.fighting) return;
-    
+
     setState(() {
       final progress = _fightController.value;
-      
-      if (progress < 0.15) {
-        _fightStatus = 'Fighters approach...';
-        _leftFighterX = 50 + (progress * 6 * 25);
-        _rightFighterX = 300 - (progress * 6 * 25);
-        _leftFighterY = math.sin(progress * 30) * 5;
-        _rightFighterY = math.sin(progress * 30) * 5;
-      } else if (progress < 0.35) {
-        _fightStatus = 'Left fighter unleashes fury!';
-        _leftFighterX = 50 + ((_leftFighterAnimation.value) * 80);
-        _leftFighterY = math.sin(_leftFighterAnimation.value * math.pi * 6) * 15;
+      final centerX = _screenWidth / 2;
+      const leftStartX = 50.0;
+      final rightStartX = _screenWidth - 150.0;
+
+      if (progress < 0.2) {
+        _fightStatus = 'Fighters moving to center...';
+        final moveProgress = progress / 0.2;
         
-        if (_leftFighterAnimation.value > 0.6) {
-          _rightHealth = math.max(0, 100 - ((_leftFighterAnimation.value - 0.6) * 250));
-          _createEnhancedImpactParticles(const Offset(250, 200));
-          _createEnergyWave(const Offset(250, 200), Colors.blue);
+        _leftFighterX = leftStartX + ((centerX - 120) - leftStartX) * moveProgress;
+        _rightFighterX = rightStartX - (rightStartX - (centerX + 120)) * moveProgress;
+        
+        _leftFighterY = math.sin(progress * 20) * 3;
+        _rightFighterY = math.sin(progress * 20) * 3;
+        
+      } else if (progress < 0.45) {
+        _fightStatus = 'Left fighter unleashes DEVASTATING fury!';
+        
+        final attackIntensity = _leftFighterAnimation.value;
+        _leftFighterX = (centerX - 120) + (attackIntensity * 100);
+        _rightFighterX = centerX + 120;
+        _leftFighterY = math.sin(attackIntensity * math.pi * 8) * 25;
+
+        if (attackIntensity > 0.6) {
+          _rightHealth = math.max(0, 100 - ((attackIntensity - 0.6) * 250));
+          
+          for (int i = 0; i < 3; i++) {
+            _createOptimizedImpactParticles(Offset(centerX + 60 + (i * 20), 180 + (i * 40)));
+          }
+          _createEnergyWave(Offset(centerX + 60, 200), Colors.blue);
+          _createEnergyWave(Offset(centerX + 80, 220), Colors.cyan);
+          
           _shakeController.forward().then((_) => _shakeController.reset());
           _scaleController.forward().then((_) => _scaleController.reset());
         }
-      } else if (progress < 0.5) {
-        _fightStatus = 'Recovery phase...';
-        final resetProgress = (progress - 0.35) / 0.15;
-        _leftFighterX = 50 + (80 * (1 - resetProgress));
-        _rightFighterX = 300 - (80 * (1 - resetProgress));
-        _leftFighterY = math.sin(resetProgress * math.pi) * 10;
-        _rightFighterY = math.sin(resetProgress * math.pi) * 10;
-      } else if (progress < 0.65) {
-        _fightStatus = 'Preparing for counter-attack...';
-        final chargeProgress = (progress - 0.5) / 0.15;
-        _leftFighterY = math.sin(chargeProgress * math.pi * 8) * 3;
-        _rightFighterY = math.sin(chargeProgress * math.pi * 8) * 3;
-      } else if (progress < 1.0) {
-        _fightStatus = 'Right fighter strikes back!';
-        _rightFighterX = 300 - ((_rightFighterAnimation.value) * 80);
-        _rightFighterY = math.sin(_rightFighterAnimation.value * math.pi * 6) * 15;
         
-        if (_rightFighterAnimation.value > 0.6) {
-          _leftHealth = math.max(0, 100 - ((_rightFighterAnimation.value - 0.6) * 250));
-          _createEnhancedImpactParticles(const Offset(150, 200));
-          _createEnergyWave(const Offset(150, 200), Colors.red);
+      } else if (progress < 0.6) {
+        _fightStatus = 'Recovering from epic clash...';
+        final resetProgress = (progress - 0.45) / 0.15;
+        
+        _leftFighterX = (centerX - 120) + (100 * (1 - resetProgress));
+        _rightFighterX = (centerX + 120) - (60 * (1 - resetProgress));
+        _leftFighterY = math.sin(resetProgress * math.pi * 2) * 15;
+        _rightFighterY = math.sin(resetProgress * math.pi * 2) * 15;
+        
+      } else if (progress < 0.75) {
+        _fightStatus = 'Preparing for ULTIMATE counter-attack...';
+        final chargeProgress = (progress - 0.6) / 0.15;
+        
+        _leftFighterX = centerX - 120;
+        _rightFighterX = centerX + 120;
+        _leftFighterY = math.sin(chargeProgress * math.pi * 12) * 5;
+        _rightFighterY = math.sin(chargeProgress * math.pi * 12) * 8;
+        
+        if (chargeProgress > 0.5) {
+          _createOptimizedImpactParticles(Offset(centerX + 120, 200));
+        }
+        
+      } else if (progress < 1.0) {
+        _fightStatus = 'Right fighter strikes with LEGENDARY power!';
+        
+        final attackIntensity = _rightFighterAnimation.value;
+        _leftFighterX = centerX - 120;
+        _rightFighterX = (centerX + 120) - (attackIntensity * 100);
+        _rightFighterY = math.sin(attackIntensity * math.pi * 8) * 25;
+
+        if (attackIntensity > 0.6) {
+          _leftHealth = math.max(0, 100 - ((attackIntensity - 0.6) * 250));
+          
+          for (int i = 0; i < 3; i++) {
+            _createOptimizedImpactParticles(Offset(centerX - 60 - (i * 20), 180 + (i * 40)));
+          }
+          _createEnergyWave(Offset(centerX - 60, 200), Colors.red);
+          _createEnergyWave(Offset(centerX - 80, 220), Colors.orange);
+          
           _shakeController.forward().then((_) => _shakeController.reset());
           _scaleController.forward().then((_) => _scaleController.reset());
         }
       }
-      
+
       if (_fightController.isCompleted) {
         _phase = FightingPhase.finished;
         if (_leftHealth > _rightHealth) {
-          _fightStatus = '🏆 Left fighter claims victory!';
+          _fightStatus = '🏆 Left fighter claims LEGENDARY victory!';
         } else if (_rightHealth > _leftHealth) {
-          _fightStatus = '🏆 Right fighter emerges triumphant!';
+          _fightStatus = '🏆 Right fighter emerges as CHAMPION!';
         } else {
-          _fightStatus = '🤝 An epic stalemate!';
+          _fightStatus = '🤝 An EPIC stalemate of legends!';
         }
       }
     });
@@ -254,33 +305,36 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
     });
   }
 
-  void _createEnhancedImpactParticles(Offset position) {
-    for (int i = 0; i < 25; i++) {
+  void _createOptimizedImpactParticles(Offset position) {
+    final particleCount = _isWeb ? 15 : 25;
+    final sparkCount = _isWeb ? 5 : 10;
+    
+    for (int i = 0; i < particleCount; i++) {
       _particles.add(Particle(
         position: position + Offset(
           (math.Random().nextDouble() - 0.5) * 20,
           (math.Random().nextDouble() - 0.5) * 20,
         ),
         velocity: Offset(
-          (math.Random().nextDouble() - 0.5) * 300,
-          (math.Random().nextDouble() - 0.5) * 300,
+          (math.Random().nextDouble() - 0.5) * (_isWeb ? 200 : 300),
+          (math.Random().nextDouble() - 0.5) * (_isWeb ? 200 : 300),
         ),
         color: [Colors.yellow, Colors.orange, Colors.red, Colors.white][math.Random().nextInt(4)],
-        life: 1.0,
-        size: 2.0 + math.Random().nextDouble() * 6,
+        life: _isWeb ? 0.8 : 1.0,
+        size: 2.0 + math.Random().nextDouble() * (_isWeb ? 4 : 6),
       ));
     }
     
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < sparkCount; i++) {
       _particles.add(Particle(
         position: position,
         velocity: Offset(
-          (math.Random().nextDouble() - 0.5) * 150,
-          -math.Random().nextDouble() * 200 - 50,
+          (math.Random().nextDouble() - 0.5) * (_isWeb ? 100 : 150),
+          -math.Random().nextDouble() * (_isWeb ? 150 : 200) - 50,
         ),
         color: Colors.white,
-        life: 1.5,
-        size: 8.0 + math.Random().nextDouble() * 4,
+        life: _isWeb ? 1.0 : 1.5,
+        size: 6.0 + math.Random().nextDouble() * 4,
       ));
     }
     
@@ -292,7 +346,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
     _energyWaves.add(EnergyWave(
       position: position,
       color: color,
-      life: 1.0,
+      life: _isWeb ? 0.8 : 1.0,
       radius: 0.0,
     ));
   }
@@ -337,7 +391,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
 
   Widget _buildPhaseIndicator() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: _isWeb ? 300 : 500),
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       decoration: BoxDecoration(
         color: _phase == FightingPhase.fighting 
@@ -354,7 +408,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
       child: Column(
         children: [
           AnimatedDefaultTextStyle(
-            duration: const Duration(milliseconds: 300),
+            duration: Duration(milliseconds: _isWeb ? 200 : 300),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -402,7 +456,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
     }
     
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: _isWeb ? 300 : 500),
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       child: Row(
         children: [
@@ -438,7 +492,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
                 ),
                 const SizedBox(height: 4),
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: _isWeb ? 200 : 300),
                   child: LinearProgressIndicator(
                     value: _leftHealth / 100,
                     backgroundColor: Colors.red[100],
@@ -507,7 +561,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
                 ),
                 const SizedBox(height: 4),
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
+                  duration: Duration(milliseconds: _isWeb ? 200 : 300),
                   child: LinearProgressIndicator(
                     value: _rightHealth / 100,
                     backgroundColor: Colors.red[100],
@@ -528,7 +582,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
 
   Widget _buildFightingArena() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 800),
+      duration: Duration(milliseconds: _isWeb ? 500 : 800),
       margin: const EdgeInsets.all(AppConstants.paddingMedium),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -541,8 +595,8 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
         borderRadius: BorderRadius.circular(AppConstants.radiusLarge),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(_phase == FightingPhase.fighting ? 0.2 : 0.1),
-            blurRadius: _phase == FightingPhase.fighting ? 15 : 10,
+            color: Colors.black.withOpacity(_phase == FightingPhase.fighting ? 0.15 : 0.1),
+            blurRadius: _phase == FightingPhase.fighting ? 12 : 10,
             offset: const Offset(0, 5),
           ),
         ],
@@ -574,11 +628,11 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
                 _shakeAnimation.value * (math.Random().nextDouble() - 0.5),
                 _shakeAnimation.value * (math.Random().nextDouble() - 0.5),
               ),
-              child: SizedBox(
+              child: Container(
                 width: double.infinity,
                 height: double.infinity,
                 child: CustomPaint(
-                  painter: EnhancedFightingCanvasPainter(
+                  painter: OptimizedFightingCanvasPainter(
                     leftFighterPaths: _leftFighterPaths,
                     rightFighterPaths: _rightFighterPaths,
                     leftPreset: _leftPreset,
@@ -594,6 +648,8 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
                     energyWaves: _energyWaves,
                     pulseValue: _pulseAnimation.value,
                     scaleValue: _scaleAnimation.value,
+                    isWeb: _isWeb,
+                    screenWidth: _screenWidth,
                   ),
                 ),
               ),
@@ -606,7 +662,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
 
   Widget _buildControls() {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 500),
+      duration: Duration(milliseconds: _isWeb ? 300 : 500),
       padding: const EdgeInsets.all(AppConstants.paddingMedium),
       decoration: BoxDecoration(
         color: AppConstants.cardColor,
@@ -632,7 +688,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
           const SizedBox(height: AppConstants.paddingMedium),
           
           AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
+            duration: Duration(milliseconds: _isWeb ? 200 : 300),
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: _getActionButtonCallback(),
@@ -994,6 +1050,11 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
       _fightStatus = 'Epic battle begins!';
       _particles.clear();
       _energyWaves.clear();
+      
+      _leftFighterX = 50;
+      _rightFighterX = _screenWidth - 150;
+      _leftFighterY = 0;
+      _rightFighterY = 0;
     });
     
     _fightController.forward();
@@ -1008,7 +1069,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
       _leftPreset = null;
       _rightPreset = null;
       _leftFighterX = 50;
-      _rightFighterX = 300;
+      _rightFighterX = _screenWidth - 150;
       _leftFighterY = 0;
       _rightFighterY = 0;
       _leftHealth = 100;
@@ -1189,7 +1250,7 @@ class EnergyWave {
   }
 }
 
-class EnhancedFightingCanvasPainter extends CustomPainter {
+class OptimizedFightingCanvasPainter extends CustomPainter {
   final List<DrawnPath> leftFighterPaths;
   final List<DrawnPath> rightFighterPaths;
   final PresetFighter? leftPreset;
@@ -1205,8 +1266,10 @@ class EnhancedFightingCanvasPainter extends CustomPainter {
   final List<EnergyWave> energyWaves;
   final double pulseValue;
   final double scaleValue;
+  final bool isWeb;
+  final double screenWidth;
 
-  EnhancedFightingCanvasPainter({
+  OptimizedFightingCanvasPainter({
     required this.leftFighterPaths,
     required this.rightFighterPaths,
     required this.leftPreset,
@@ -1222,11 +1285,18 @@ class EnhancedFightingCanvasPainter extends CustomPainter {
     required this.energyWaves,
     required this.pulseValue,
     required this.scaleValue,
+    required this.isWeb,
+    required this.screenWidth,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
-    _drawArenaBackground(canvas, size);
+    if (isWeb) {
+      _drawSimplifiedBackground(canvas, size);
+    } else {
+      _drawArenaBackground(canvas, size);
+    }
+    
     _drawCenterLine(canvas, size);
     
     if (phase == FightingPhase.drawing) {
@@ -1239,7 +1309,31 @@ class EnhancedFightingCanvasPainter extends CustomPainter {
     _drawParticles(canvas);
     
     if (phase == FightingPhase.fighting) {
-      _drawFightingEffects(canvas, size);
+      if (isWeb) {
+        _drawSimplifiedFightingEffects(canvas, size);
+      } else {
+        _drawFightingEffects(canvas, size);
+      }
+    }
+  }
+
+  void _drawSimplifiedBackground(Canvas canvas, Size size) {
+    final groundPaint = Paint()
+      ..color = Colors.brown[300]!
+      ..style = PaintingStyle.fill;
+    canvas.drawRect(
+      Rect.fromLTWH(0, size.height * 0.85, size.width, size.height * 0.15),
+      groundPaint,
+    );
+    
+    final cloudPaint = Paint()
+      ..color = Colors.white.withOpacity(0.6)
+      ..style = PaintingStyle.fill;
+    
+    for (int i = 0; i < 2; i++) {
+      final x = size.width * (0.3 + i * 0.4);
+      final y = size.height * 0.15;
+      _drawCloud(canvas, Offset(x, y), cloudPaint);
     }
   }
 
@@ -1268,8 +1362,9 @@ class EnhancedFightingCanvasPainter extends CustomPainter {
         ..strokeWidth = 2
         ..style = PaintingStyle.stroke;
       
+      final centerX = size.width / 2;
       for (int i = 0; i < 5; i++) {
-        final x = math.Random().nextDouble() * size.width;
+        final x = centerX + (math.Random().nextDouble() - 0.5) * 300;
         final y = math.Random().nextDouble() * size.height * 0.3;
         _drawLightning(canvas, Offset(x, y), lightningPaint);
       }
@@ -1664,7 +1759,8 @@ class EnhancedFightingCanvasPainter extends CustomPainter {
     );
     canvas.drawRect(
       Rect.fromCenter(center: center + const Offset(8, 25), width: 8, height: 20),
-      fillPaint,    );
+      fillPaint,
+    );
   }
 
   void _drawStar(Canvas canvas, Offset center, double radius, Paint paint) {
@@ -1721,81 +1817,156 @@ class EnhancedFightingCanvasPainter extends CustomPainter {
     }
   }
 
+  void _drawSimplifiedFightingEffects(Canvas canvas, Size size) {
+    final centerX = size.width / 2;
+    
+    if (fightProgress > 0.2 && fightProgress < 0.6) {
+      final attackIntensity = math.sin(fightProgress * 30) * 0.5 + 0.5;
+      
+      final energyPaint = Paint()
+        ..color = Colors.blue.withOpacity(attackIntensity * 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4;
+      
+      for (int i = 0; i < 3; i++) {
+        canvas.drawCircle(
+          Offset(centerX - 60, size.height * 0.6),
+          15.0 + (i * 10) + (attackIntensity * 8),
+          energyPaint,
+        );
+      }
+    }
+    
+    if (fightProgress > 0.75 && fightProgress < 1.0) {
+      final attackIntensity = math.sin(fightProgress * 30) * 0.5 + 0.5;
+      
+      final energyPaint = Paint()
+        ..color = Colors.red.withOpacity(attackIntensity * 0.6)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 4;
+      
+      for (int i = 0; i < 3; i++) {
+        canvas.drawCircle(
+          Offset(centerX + 60, size.height * 0.6),
+          15.0 + (i * 10) + (attackIntensity * 8),
+          energyPaint,
+        );
+      }
+    }
+  }
+
   void _drawFightingEffects(Canvas canvas, Size size) {
-    if (fightProgress > 0.15 && fightProgress < 0.5) {
+    final centerX = size.width / 2;
+    
+    if (fightProgress > 0.2 && fightProgress < 0.6) {
       final attackIntensity = math.sin(fightProgress * 50) * 0.5 + 0.5;
       
       final energyPaint = Paint()
-        ..color = Colors.blue.withOpacity(attackIntensity * 0.8)
+        ..color = Colors.blue.withOpacity(attackIntensity * 0.9)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 6;
+        ..strokeWidth = 8;
       
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 7; i++) {
         canvas.drawCircle(
-          Offset(leftFighterX + 40, size.height * 0.6),
-          20.0 + (i * 12) + (attackIntensity * 10),
+          Offset(centerX - 60, size.height * 0.6),
+          25.0 + (i * 15) + (attackIntensity * 15),
           energyPaint,
         );
+      }
+      
+      final lightningPaint = Paint()
+        ..color = Colors.yellow.withOpacity(attackIntensity * 0.8)
+        ..strokeWidth = 4
+        ..style = PaintingStyle.stroke;
+      
+      for (int i = 0; i < 6; i++) {
+        final angle = (i * math.pi / 3) + (fightProgress * 15);
+        final startX = centerX - 60 + math.cos(angle) * 40;
+        final startY = size.height * 0.6 + math.sin(angle) * 40;
+        final endX = centerX - 60 + math.cos(angle) * 80;
+        final endY = size.height * 0.6 + math.sin(angle) * 80;
+        
+        canvas.drawLine(Offset(startX, startY), Offset(endX, endY), lightningPaint);
       }
       
       final sparkPaint = Paint()
         ..color = Colors.yellow.withOpacity(attackIntensity)
         ..style = PaintingStyle.fill;
       
-      for (int i = 0; i < 8; i++) {
-        final angle = (i * math.pi / 4) + (fightProgress * 20);
-        final sparkX = leftFighterX + 40 + math.cos(angle) * 30;
-        final sparkY = size.height * 0.6 + math.sin(angle) * 30;
-        canvas.drawCircle(Offset(sparkX, sparkY), 3, sparkPaint);
+      for (int i = 0; i < 12; i++) {
+        final angle = (i * math.pi / 6) + (fightProgress * 25);
+        final sparkX = centerX - 60 + math.cos(angle) * (50 + attackIntensity * 30);
+        final sparkY = size.height * 0.6 + math.sin(angle) * (50 + attackIntensity * 30);
+        canvas.drawCircle(Offset(sparkX, sparkY), 4, sparkPaint);
       }
     }
     
-    if (fightProgress > 0.65 && fightProgress < 1.0) {
+    if (fightProgress > 0.75 && fightProgress < 1.0) {
       final attackIntensity = math.sin(fightProgress * 50) * 0.5 + 0.5;
       
       final energyPaint = Paint()
-        ..color = Colors.red.withOpacity(attackIntensity * 0.8)
+        ..color = Colors.red.withOpacity(attackIntensity * 0.9)
         ..style = PaintingStyle.stroke
-        ..strokeWidth = 6;
+        ..strokeWidth = 8;
       
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 7; i++) {
         canvas.drawCircle(
-          Offset(rightFighterX - 40, size.height * 0.6),
-          20.0 + (i * 12) + (attackIntensity * 10),
+          Offset(centerX + 60, size.height * 0.6),
+          25.0 + (i * 15) + (attackIntensity * 15),
           energyPaint,
         );
       }
       
-      final sparkPaint = Paint()
+      final firePaint = Paint()
+        ..color = Colors.orange.withOpacity(attackIntensity * 0.8)
+        ..strokeWidth = 4
+        ..style = PaintingStyle.stroke;
+      
+      for (int i = 0; i < 6; i++) {
+        final angle = (i * math.pi / 3) + (fightProgress * 15);
+        final startX = centerX + 60 + math.cos(angle) * 40;
+        final startY = size.height * 0.6 + math.sin(angle) * 40;
+        final endX = centerX + 60 + math.cos(angle) * 80;
+        final endY = size.height * 0.6 + math.sin(angle) * 80;
+        
+        canvas.drawLine(Offset(startX, startY), Offset(endX, endY), firePaint);
+      }
+      
+      final emberPaint = Paint()
         ..color = Colors.orange.withOpacity(attackIntensity)
         ..style = PaintingStyle.fill;
       
-      for (int i = 0; i < 8; i++) {
-        final angle = (i * math.pi / 4) + (fightProgress * 20);
-        final sparkX = rightFighterX - 40 + math.cos(angle) * 30;
-        final sparkY = size.height * 0.6 + math.sin(angle) * 30;
-        canvas.drawCircle(Offset(sparkX, sparkY), 3, sparkPaint);
+      for (int i = 0; i < 12; i++) {
+        final angle = (i * math.pi / 6) + (fightProgress * 25);
+        final emberX = centerX + 60 + math.cos(angle) * (50 + attackIntensity * 30);
+        final emberY = size.height * 0.6 + math.sin(angle) * (50 + attackIntensity * 30);
+        canvas.drawCircle(Offset(emberX, emberY), 4, emberPaint);
       }
     }
     
     if (phase == FightingPhase.fighting) {
-      final intensity = math.sin(fightProgress * 30) * 0.3 + 0.7;
+      final intensity = math.sin(fightProgress * 40) * 0.4 + 0.8;
       
-      final auraPaint = Paint()
-        ..color = Colors.white.withOpacity(intensity * 0.2)
+      final leftAuraPaint = Paint()
+        ..color = Colors.blue.withOpacity(intensity * 0.3)
         ..style = PaintingStyle.fill
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
+      
+      final rightAuraPaint = Paint()
+        ..color = Colors.red.withOpacity(intensity * 0.3)
+        ..style = PaintingStyle.fill
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 12);
       
       canvas.drawCircle(
-        Offset(leftFighterX + 25, size.height * 0.6),
-        40 * intensity,
-        auraPaint,
+        Offset(centerX - 120, size.height * 0.6),
+        60 * intensity,
+        leftAuraPaint,
       );
       
       canvas.drawCircle(
-        Offset(rightFighterX + 25, size.height * 0.6),
-        40 * intensity,
-        auraPaint,
+        Offset(centerX + 120, size.height * 0.6),
+        60 * intensity,
+        rightAuraPaint,
       );
     }
   }
