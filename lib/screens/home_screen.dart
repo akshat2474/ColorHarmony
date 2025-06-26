@@ -11,6 +11,7 @@ import 'palette_generator_screen.dart';
 import 'saved_palettes_screen.dart';
 import 'accessibility_checker_screen.dart';
 import 'palette_detail_screen.dart';
+import 'drawing_pad_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,11 +20,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen>
-    with TickerProviderStateMixin {
+class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
-  
+
   Color _selectedColor = const Color(0xFF667eea);
   HarmonyType _selectedHarmony = HarmonyType.analogous;
   List<Color> _generatedColors = [];
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen>
       duration: AppConstants.animationSlow,
       vsync: this,
     );
-    
+
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
@@ -43,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen>
       parent: _fadeController,
       curve: Curves.easeInOut,
     ));
-    
+
     _generateColors();
     _fadeController.forward();
   }
@@ -56,7 +56,8 @@ class _HomeScreenState extends State<HomeScreen>
 
   void _generateColors() {
     setState(() {
-      _generatedColors = ColorService.generateHarmony(_selectedColor, _selectedHarmony);
+      _generatedColors =
+          ColorService.generateHarmony(_selectedColor, _selectedHarmony);
     });
   }
 
@@ -229,9 +230,9 @@ class _HomeScreenState extends State<HomeScreen>
   }
 
   Widget _buildHarmonySelector() {
-    final selectedHarmony = ColorHarmony.harmonies
-        .firstWhere((h) => h.type == _selectedHarmony);
-    
+    final selectedHarmony =
+        ColorHarmony.harmonies.firstWhere((h) => h.type == _selectedHarmony);
+
     return GestureDetector(
       onTap: _showHarmonySelectorModal,
       child: Container(
@@ -357,16 +358,24 @@ class _HomeScreenState extends State<HomeScreen>
                   final color = entry.value;
                   final isFirst = index == 0;
                   final isLast = index == _generatedColors.length - 1;
-                  
+
                   return Expanded(
                     child: Container(
                       decoration: BoxDecoration(
                         color: color,
                         borderRadius: BorderRadius.only(
-                          topLeft: isFirst ? const Radius.circular(AppConstants.radiusMedium) : Radius.zero,
-                          bottomLeft: isFirst ? const Radius.circular(AppConstants.radiusMedium) : Radius.zero,
-                          topRight: isLast ? const Radius.circular(AppConstants.radiusMedium) : Radius.zero,
-                          bottomRight: isLast ? const Radius.circular(AppConstants.radiusMedium) : Radius.zero,
+                          topLeft: isFirst
+                              ? const Radius.circular(AppConstants.radiusMedium)
+                              : Radius.zero,
+                          bottomLeft: isFirst
+                              ? const Radius.circular(AppConstants.radiusMedium)
+                              : Radius.zero,
+                          topRight: isLast
+                              ? const Radius.circular(AppConstants.radiusMedium)
+                              : Radius.zero,
+                          bottomRight: isLast
+                              ? const Radius.circular(AppConstants.radiusMedium)
+                              : Radius.zero,
                         ),
                       ),
                       child: Center(
@@ -384,7 +393,7 @@ class _HomeScreenState extends State<HomeScreen>
                 }).toList(),
               ),
             ),
-            
+
             const SizedBox(height: AppConstants.paddingMedium),
             Wrap(
               spacing: AppConstants.paddingSmall,
@@ -401,9 +410,9 @@ class _HomeScreenState extends State<HomeScreen>
                 );
               }).toList(),
             ),
-            
+
             const SizedBox(height: AppConstants.paddingSmall),
-            
+
             // Tap to view details hint
             Container(
               padding: const EdgeInsets.all(8),
@@ -437,6 +446,8 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
+// Update your _buildQuickActions() method to include the Drawing Pad button:
+
   Widget _buildQuickActions() {
     return Column(
       children: [
@@ -462,7 +473,8 @@ class _HomeScreenState extends State<HomeScreen>
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                 ),
               ),
@@ -482,7 +494,8 @@ class _HomeScreenState extends State<HomeScreen>
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
                   ),
                 ),
               ),
@@ -490,28 +503,58 @@ class _HomeScreenState extends State<HomeScreen>
           ],
         ),
         const SizedBox(height: AppConstants.paddingMedium),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                _selectedColor = ColorService.generateRandomColor();
-                _selectedHarmony = HarmonyType.values[
-                    DateTime.now().millisecond % HarmonyType.values.length];
-              });
-              _generateColors();
-            },
-            icon: const Icon(Icons.shuffle),
-            label: const Text('Random Palette'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.orange,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppConstants.radiusMedium),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  setState(() {
+                    _selectedColor = ColorService.generateRandomColor();
+                    _selectedHarmony = HarmonyType.values[
+                        DateTime.now().millisecond % HarmonyType.values.length];
+                  });
+                  _generateColors();
+                },
+                icon: const Icon(Icons.shuffle),
+                label: const Text('Random Palette'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
+                  ),
+                ),
               ),
             ),
-          ),
+            const SizedBox(width: AppConstants.paddingMedium),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => DrawingPadScreen(
+                        initialColors: _generatedColors,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.draw),
+                label: const Text('Drawing Pad'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(AppConstants.radiusMedium),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );
