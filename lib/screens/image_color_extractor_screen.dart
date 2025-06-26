@@ -11,7 +11,7 @@ import '../utils/constants.dart';
 import '../utils/color_utils.dart';
 
 class ImageColorExtractorScreen extends StatefulWidget {
-  const ImageColorExtractorScreen({Key? key}) : super(key: key);
+  const ImageColorExtractorScreen({super.key});
 
   @override
   State<ImageColorExtractorScreen> createState() => _ImageColorExtractorScreenState();

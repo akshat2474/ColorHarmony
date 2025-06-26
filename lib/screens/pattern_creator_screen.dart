@@ -15,9 +15,9 @@ class PatternCreatorScreen extends StatefulWidget {
   final List<Color>? initialColors;
 
   const PatternCreatorScreen({
-    Key? key,
+    super.key,
     this.initialColors,
-  }) : super(key: key);
+  });
 
   @override
   State<PatternCreatorScreen> createState() => _PatternCreatorScreenState();
@@ -35,7 +35,7 @@ class _PatternCreatorScreenState extends State<PatternCreatorScreen>
   double _rotation = 0.0;
   bool _isAnimated = false;
   
-  GlobalKey _patternKey = GlobalKey();
+  final GlobalKey _patternKey = GlobalKey();
 
   @override
   void initState() {

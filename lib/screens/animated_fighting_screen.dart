@@ -10,9 +10,9 @@ class AnimatedFightingScreen extends StatefulWidget {
   final List<Color>? initialColors;
 
   const AnimatedFightingScreen({
-    Key? key,
+    super.key,
     this.initialColors,
-  }) : super(key: key);
+  });
 
   @override
   State<AnimatedFightingScreen> createState() => _AnimatedFightingScreenState();
@@ -574,7 +574,7 @@ class _AnimatedFightingScreenState extends State<AnimatedFightingScreen>
                 _shakeAnimation.value * (math.Random().nextDouble() - 0.5),
                 _shakeAnimation.value * (math.Random().nextDouble() - 0.5),
               ),
-              child: Container(
+              child: SizedBox(
                 width: double.infinity,
                 height: double.infinity,
                 child: CustomPaint(

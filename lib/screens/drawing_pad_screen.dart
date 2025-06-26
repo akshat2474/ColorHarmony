@@ -19,9 +19,9 @@ class DrawingPadScreen extends StatefulWidget {
   final List<Color>? initialColors;
 
   const DrawingPadScreen({
-    Key? key,
+    super.key,
     this.initialColors,
-  }) : super(key: key);
+  });
 
   @override
   State<DrawingPadScreen> createState() => _DrawingPadScreenState();
@@ -412,7 +412,7 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
             _shapeEndPoint = null;
           }
         },
-        child: Container(
+        child: SizedBox(
           width: double.infinity,
           height: double.infinity,
           child: CustomPaint(
