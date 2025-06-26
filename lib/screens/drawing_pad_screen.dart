@@ -12,8 +12,7 @@ import '../models/color_harmony.dart';
 import '../utils/constants.dart';
 import 'package:gal/gal.dart';
 
-
-enum DrawingTool { brush, eraser, line, rectangle, circle, text }
+enum DrawingTool { brush, eraser, line, rectangle, circle, text, fill }
 
 class DrawingPadScreen extends StatefulWidget {
   final List<Color>? initialColors;
@@ -71,6 +70,8 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
       Colors.purple,
       Colors.pink,
       Colors.brown,
+      Colors.yellow,
+      Colors.cyan,
     ];
   }
 
@@ -158,6 +159,7 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
             children: [
               _buildToolButton(DrawingTool.brush, Icons.brush, 'Brush'),
               _buildToolButton(DrawingTool.eraser, Icons.cleaning_services, 'Eraser'),
+              _buildToolButton(DrawingTool.fill, Icons.format_color_fill, 'Fill'),
               _buildToolButton(DrawingTool.line, Icons.remove, 'Line'),
               _buildToolButton(DrawingTool.rectangle, Icons.crop_square, 'Rectangle'),
               _buildToolButton(DrawingTool.circle, Icons.circle_outlined, 'Circle'),
@@ -198,7 +200,6 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
                 ),
               ),
               const SizedBox(width: AppConstants.paddingMedium),
-              // Current color indicator
               Container(
                 width: 40,
                 height: 40,
@@ -222,9 +223,18 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
         setState(() {
           _selectedTool = tool;
         });
+        
+        if (tool == DrawingTool.fill) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Tap on any closed shape to fill it with selected color'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
         decoration: BoxDecoration(
           color: isSelected ? AppConstants.primaryColor : Colors.transparent,
           borderRadius: BorderRadius.circular(AppConstants.radiusSmall),
@@ -234,14 +244,14 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
             Icon(
               icon,
               color: isSelected ? Colors.white : AppConstants.textSecondary,
-              size: 24,
+              size: 20,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
                 color: isSelected ? Colors.white : AppConstants.textSecondary,
-                fontSize: 10,
+                fontSize: 9,
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -325,12 +335,14 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
       key: _canvasKey,
       child: GestureDetector(
         onTapDown: (details) {
-          if (_selectedTool == DrawingTool.text) {
+          if (_selectedTool == DrawingTool.fill) {
+            _fillShapeAtPosition(details.localPosition);
+          } else if (_selectedTool == DrawingTool.text) {
             bool foundText = false;
             for (final element in _elements.reversed) {
               if (element is DrawnText) {
                 final distance = (details.localPosition - element.position).distance;
-                if (distance < 50) { // touch radius for text selection
+                if (distance < 50) {
                   foundText = true;
                   break;
                 }
@@ -346,7 +358,7 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
             for (final element in _elements.reversed) {
               if (element is DrawnText) {
                 final distance = (details.localPosition - element.position).distance;
-                if (distance < 50) { // touch radius
+                if (distance < 50) {
                   _draggingText = element;
                   _dragStartOffset = details.localPosition - element.position;
                   break;
@@ -416,7 +428,7 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
           width: double.infinity,
           height: double.infinity,
           child: CustomPaint(
-            painter: DrawingPainter(
+            painter: EnhancedDrawingPainter(
               _elements,
               _isDrawingShape ? _shapeStartPoint : null,
               _isDrawingShape ? _shapeEndPoint : null,
@@ -533,6 +545,7 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
             ),
             color: _selectedColor,
             strokeWidth: _strokeWidth,
+            fillColor: Colors.transparent,
           ));
           break;
         case DrawingTool.circle:
@@ -546,12 +559,61 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
             radius: radius,
             color: _selectedColor,
             strokeWidth: _strokeWidth,
+            fillColor: Colors.transparent,
           ));
           break;
         default:
           break;
       }
     });
+  }
+
+  void _fillShapeAtPosition(Offset position) {
+    setState(() {
+      for (int i = _elements.length - 1; i >= 0; i--) {
+        final element = _elements[i];
+        
+        if (element is DrawnRectangle) {
+          final rect = Rect.fromPoints(element.topLeft, element.bottomRight);
+          if (rect.contains(position)) {
+            _elements[i] = DrawnRectangle(
+              topLeft: element.topLeft,
+              bottomRight: element.bottomRight,
+              color: element.color,
+              strokeWidth: element.strokeWidth,
+              fillColor: _selectedColor,
+            );
+            break;
+          }
+        } else if (element is DrawnCircle) {
+          final distance = (position - element.center).distance;
+          if (distance <= element.radius) {
+            _elements[i] = DrawnCircle(
+              center: element.center,
+              radius: element.radius,
+              color: element.color,
+              strokeWidth: element.strokeWidth,
+              fillColor: _selectedColor,
+            );
+            break;
+          }
+        } else if (element is DrawnPath) {
+          if (_isPointInClosedPath(position, element.path)) {
+            _elements[i] = DrawnPath(
+              path: element.path,
+              color: element.color,
+              strokeWidth: element.strokeWidth,
+              fillColor: _selectedColor,
+            );
+            break;
+          }
+        }
+      }
+    });
+  }
+
+  bool _isPointInClosedPath(Offset point, Path path) {
+    return path.contains(point);
   }
 
   void _addTextAtPosition(Offset position) {
@@ -614,75 +676,230 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
 
   void _eraseAtPosition(Offset position) {
     setState(() {
-      _elements.removeWhere((element) {
-        return _isPointNearElement(position, element);
-      });
+      final tolerance = _strokeWidth + 5.0;
+      
+      for (int i = _elements.length - 1; i >= 0; i--) {
+        final element = _elements[i];
+        
+        if (element is DrawnPath) {
+          final newPath = _eraseFromPath(element.path, position, tolerance);
+          if (newPath != null) {
+            if (_isPathEmpty(newPath)) {
+              _elements.removeAt(i);
+            } else {
+              _elements[i] = DrawnPath(
+                path: newPath,
+                color: element.color,
+                strokeWidth: element.strokeWidth,
+                fillColor: element.fillColor,
+              );
+            }
+          }
+        } else if (element is DrawnLine) {
+          if (_isPointNearLine(position, element.start, element.end, tolerance)) {
+            final newLines = _splitLineAtPoint(element, position, tolerance);
+            _elements.removeAt(i);
+            _elements.insertAll(i, newLines);
+          }
+        } else if (element is DrawnRectangle) {
+          if (_isPointNearRectangle(position, element, tolerance)) {
+            final newPaths = _breakRectangleAtPoint(element, position, tolerance);
+            _elements.removeAt(i);
+            _elements.insertAll(i, newPaths);
+          }
+        } else if (element is DrawnCircle) {
+          if (_isPointNearCircle(position, element, tolerance)) {
+            final newPaths = _breakCircleAtPoint(element, position, tolerance);
+            _elements.removeAt(i);
+            _elements.insertAll(i, newPaths);
+          }
+        } else if (element is DrawnText) {
+          if ((position - element.position).distance < tolerance) {
+            _elements.removeAt(i);
+          }
+        }
+      }
     });
   }
 
-  bool _isPointNearElement(Offset point, DrawnElement element) {
-    const tolerance = 20.0;
+  Path? _eraseFromPath(Path originalPath, Offset erasePoint, double tolerance) {
+    final pathMetrics = originalPath.computeMetrics();
+    final newPath = Path();
+    bool pathModified = false;
     
-    if (element is DrawnPath) {
-      final pathMetrics = element.path.computeMetrics();
-      for (final metric in pathMetrics) {
-        for (double distance = 0; distance < metric.length; distance += 5) {
-          final tangent = metric.getTangentForOffset(distance);
-          if (tangent != null) {
-            final pathPoint = tangent.position;
-            if ((point - pathPoint).distance < tolerance) {
-              return true;
-            }
-          }
-        }
-      }
-    } else if (element is DrawnText) {
-      return (point - element.position).distance < tolerance;
-    } else if (element is DrawnLine) {
-      final lineLength = (element.end - element.start).distance;
-      if (lineLength == 0) return false;
+    for (final metric in pathMetrics) {
+      bool inErasedSection = false;
+      Path currentSegment = Path();
       
-      final t = ((point - element.start).dx * (element.end - element.start).dx + 
-                 (point - element.start).dy * (element.end - element.start).dy) / 
-                (lineLength * lineLength);
-      
-      if (t >= 0 && t <= 1) {
-        final projection = element.start + (element.end - element.start) * t;
-        return (point - projection).distance < tolerance;
-      }
-    } else if (element is DrawnRectangle) {
-      final rect = Rect.fromPoints(element.topLeft, element.bottomRight);
-      final edges = [
-        [rect.topLeft, rect.topRight],
-        [rect.topRight, rect.bottomRight],
-        [rect.bottomRight, rect.bottomLeft],
-        [rect.bottomLeft, rect.topLeft],
-      ];
-      
-      for (final edge in edges) {
-        final start = edge[0];
-        final end = edge[1];
-        final lineLength = (end - start).distance;
-        
-        if (lineLength > 0) {
-          final t = ((point - start).dx * (end - start).dx + 
-                     (point - start).dy * (end - start).dy) / 
-                    (lineLength * lineLength);
+      for (double distance = 0; distance <= metric.length; distance += 2) {
+        final tangent = metric.getTangentForOffset(distance);
+        if (tangent != null) {
+          final pathPoint = tangent.position;
+          final isNearErasePoint = (pathPoint - erasePoint).distance < tolerance;
           
-          if (t >= 0 && t <= 1) {
-            final projection = start + (end - start) * t;
-            if ((point - projection).distance < tolerance) {
-              return true;
+          if (isNearErasePoint && !inErasedSection) {
+            if (!_isPathEmpty(currentSegment)) {
+              newPath.addPath(currentSegment, Offset.zero);
+            }
+            currentSegment = Path();
+            inErasedSection = true;
+            pathModified = true;
+          } else if (!isNearErasePoint && inErasedSection) {
+            currentSegment.moveTo(pathPoint.dx, pathPoint.dy);
+            inErasedSection = false;
+          } else if (!inErasedSection) {
+            if (_isPathEmpty(currentSegment)) {
+              currentSegment.moveTo(pathPoint.dx, pathPoint.dy);
+            } else {
+              currentSegment.lineTo(pathPoint.dx, pathPoint.dy);
             }
           }
         }
       }
-    } else if (element is DrawnCircle) {
-      final distanceToCenter = (point - element.center).distance;
-      return (distanceToCenter - element.radius).abs() < tolerance;
+      
+      if (!_isPathEmpty(currentSegment)) {
+        newPath.addPath(currentSegment, Offset.zero);
+      }
+    }
+    
+    return pathModified ? newPath : null;
+  }
+
+  bool _isPathEmpty(Path path) {
+    final bounds = path.getBounds();
+    return bounds.width == 0 && bounds.height == 0;
+  }
+
+  bool _isPointNearLine(Offset point, Offset start, Offset end, double tolerance) {
+    final lineLength = (end - start).distance;
+    if (lineLength == 0) return false;
+    
+    final t = ((point - start).dx * (end - start).dx + 
+               (point - start).dy * (end - start).dy) / 
+              (lineLength * lineLength);
+    
+    if (t >= 0 && t <= 1) {
+      final projection = start + (end - start) * t;
+      return (point - projection).distance < tolerance;
+    }
+    return false;
+  }
+
+  List<DrawnElement> _splitLineAtPoint(DrawnLine line, Offset erasePoint, double tolerance) {
+    final lineLength = (line.end - line.start).distance;
+    final t = ((erasePoint - line.start).dx * (line.end - line.start).dx + 
+               (erasePoint - line.start).dy * (line.end - line.start).dy) / 
+              (lineLength * lineLength);
+    
+    final eraseRadius = tolerance / lineLength;
+    
+    final List<DrawnElement> newLines = [];
+    
+    if (t - eraseRadius > 0.1) {
+      newLines.add(DrawnLine(
+        start: line.start,
+        end: line.start + (line.end - line.start) * (t - eraseRadius),
+        color: line.color,
+        strokeWidth: line.strokeWidth,
+      ));
+    }
+    
+    if (t + eraseRadius < 0.9) {
+      newLines.add(DrawnLine(
+        start: line.start + (line.end - line.start) * (t + eraseRadius),
+        end: line.end,
+        color: line.color,
+        strokeWidth: line.strokeWidth,
+      ));
+    }
+    
+    return newLines;
+  }
+
+  bool _isPointNearRectangle(Offset point, DrawnRectangle rect, double tolerance) {
+    final rectangle = Rect.fromPoints(rect.topLeft, rect.bottomRight);
+    
+    if (rect.fillColor != Colors.transparent && rectangle.contains(point)) {
+      return true;
+    }
+    
+    final edges = [
+      [rectangle.topLeft, rectangle.topRight],
+      [rectangle.topRight, rectangle.bottomRight],
+      [rectangle.bottomRight, rectangle.bottomLeft],
+      [rectangle.bottomLeft, rectangle.topLeft],
+    ];
+    
+    for (final edge in edges) {
+      if (_isPointNearLine(point, edge[0], edge[1], tolerance)) {
+        return true;
+      }
     }
     
     return false;
+  }
+
+  List<DrawnElement> _breakRectangleAtPoint(DrawnRectangle rect, Offset erasePoint, double tolerance) {
+    final rectangle = Rect.fromPoints(rect.topLeft, rect.bottomRight);
+    final List<DrawnElement> newElements = [];
+    
+    final edges = [
+      DrawnLine(start: rectangle.topLeft, end: rectangle.topRight, color: rect.color, strokeWidth: rect.strokeWidth),
+      DrawnLine(start: rectangle.topRight, end: rectangle.bottomRight, color: rect.color, strokeWidth: rect.strokeWidth),
+      DrawnLine(start: rectangle.bottomRight, end: rectangle.bottomLeft, color: rect.color, strokeWidth: rect.strokeWidth),
+      DrawnLine(start: rectangle.bottomLeft, end: rectangle.topLeft, color: rect.color, strokeWidth: rect.strokeWidth),
+    ];
+    
+    for (final edge in edges) {
+      if (!_isPointNearLine(erasePoint, edge.start, edge.end, tolerance)) {
+        newElements.add(edge);
+      } else {
+        newElements.addAll(_splitLineAtPoint(edge, erasePoint, tolerance));
+      }
+    }
+    
+    return newElements;
+  }
+
+  bool _isPointNearCircle(Offset point, DrawnCircle circle, double tolerance) {
+    final distanceToCenter = (point - circle.center).distance;
+    
+    if (circle.fillColor != Colors.transparent && distanceToCenter <= circle.radius) {
+      return true;
+    }
+    
+    return (distanceToCenter - circle.radius).abs() < tolerance;
+  }
+
+  List<DrawnElement> _breakCircleAtPoint(DrawnCircle circle, Offset erasePoint, double tolerance) {
+    final List<DrawnElement> newElements = [];
+    
+    final angleToErasePoint = math.atan2(
+      erasePoint.dy - circle.center.dy,
+      erasePoint.dx - circle.center.dx,
+    );
+    
+    final eraseAngleRange = tolerance / circle.radius;
+    
+    final startAngle = angleToErasePoint + eraseAngleRange;
+    final endAngle = angleToErasePoint - eraseAngleRange + 2 * math.pi;
+    
+    if (endAngle - startAngle > 0.2) {
+      final arcPath = Path();
+      arcPath.addArc(
+        Rect.fromCircle(center: circle.center, radius: circle.radius),
+        startAngle,
+        endAngle - startAngle,
+      );
+      
+      newElements.add(DrawnPath(
+        path: arcPath,
+        color: circle.color,
+        strokeWidth: circle.strokeWidth,
+      ));
+    }
+    
+    return newElements;
   }
 
   void _undo() {
@@ -719,69 +936,71 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
     );
   }
 
-Future<void> _saveDrawing() async {
-  try {
-    final hasAccess = await Gal.hasAccess();
-    if (!hasAccess) {
-      final requestGranted = await Gal.requestAccess();
-      if (!requestGranted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Gallery access permission required to save drawing'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-    }
-
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-    RenderRepaintBoundary boundary = _canvasKey.currentContext!
-        .findRenderObject() as RenderRepaintBoundary;
-    ui.Image image = await boundary.toImage(pixelRatio: 3.0);
-    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-    Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-    final directory = await getTemporaryDirectory();
-    final timestamp = DateTime.now().millisecondsSinceEpoch;
-    final tempFile = File('${directory.path}/color_harmony_drawing_$timestamp.png');
-    await tempFile.writeAsBytes(pngBytes);
-    await Gal.putImage(tempFile.path, album: 'Color Harmony');
-    await tempFile.delete();
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.white),
-            SizedBox(width: 8),
-            Expanded(
-              child: Text('Drawing saved to Gallery! 🎨\nCheck your Photos app in "Color Harmony" album'),
+  Future<void> _saveDrawing() async {
+    try {
+      final hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        final requestGranted = await Gal.requestAccess();
+        if (!requestGranted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Gallery access permission required to save drawing'),
+              backgroundColor: Colors.red,
             ),
-          ],
+          );
+          return;
+        }
+      }
+
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
         ),
-        duration: Duration(seconds: 4),
-        backgroundColor: Colors.green,
-      ),
-    );
-  } catch (e) {
-    if (Navigator.canPop(context)) {
+      );
+      
+      RenderRepaintBoundary boundary = _canvasKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
+      ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+      final directory = await getTemporaryDirectory();
+      final timestamp = DateTime.now().millisecondsSinceEpoch;
+      final tempFile = File('${directory.path}/color_harmony_drawing_$timestamp.png');
+      await tempFile.writeAsBytes(pngBytes);
+      await Gal.putImage(tempFile.path, album: 'Color Harmony');
+      await tempFile.delete();
+      
       Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle, color: Colors.white),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text('Drawing saved to Gallery! 🎨\nCheck your Photos app in "Color Harmony" album'),
+              ),
+            ],
+          ),
+          duration: Duration(seconds: 4),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error saving to gallery: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error saving to gallery: $e'),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
 
   void _showColorHarmonyGenerator() {
     showModalBottomSheet(
@@ -897,11 +1116,13 @@ class DrawnPath extends DrawnElement {
   final Path path;
   final Color color;
   final double strokeWidth;
+  final Color fillColor;
 
   DrawnPath({
     required this.path,
     required this.color,
     required this.strokeWidth,
+    this.fillColor = Colors.transparent,
   });
 }
 
@@ -924,12 +1145,14 @@ class DrawnRectangle extends DrawnElement {
   final Offset bottomRight;
   final Color color;
   final double strokeWidth;
+  final Color fillColor;
 
   DrawnRectangle({
     required this.topLeft,
     required this.bottomRight,
     required this.color,
     required this.strokeWidth,
+    this.fillColor = Colors.transparent,
   });
 }
 
@@ -938,12 +1161,14 @@ class DrawnCircle extends DrawnElement {
   final double radius;
   final Color color;
   final double strokeWidth;
+  final Color fillColor;
 
   DrawnCircle({
     required this.center,
     required this.radius,
     required this.color,
     required this.strokeWidth,
+    this.fillColor = Colors.transparent,
   });
 }
 
@@ -962,8 +1187,7 @@ class DrawnText extends DrawnElement {
     required this.fontFamily,
   });
 }
-
-class DrawingPainter extends CustomPainter {
+class EnhancedDrawingPainter extends CustomPainter {
   final List<DrawnElement> elements;
   final Offset? previewStart;
   final Offset? previewEnd;
@@ -971,7 +1195,7 @@ class DrawingPainter extends CustomPainter {
   final Color currentColor;
   final double currentStrokeWidth;
 
-  DrawingPainter(
+  EnhancedDrawingPainter(
     this.elements,
     this.previewStart,
     this.previewEnd,
@@ -984,6 +1208,13 @@ class DrawingPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     for (final element in elements) {
       if (element is DrawnPath) {
+        if (element.fillColor != Colors.transparent) {
+          final fillPaint = Paint()
+            ..color = element.fillColor
+            ..style = PaintingStyle.fill;
+          canvas.drawPath(element.path, fillPaint);
+        }
+        
         final paint = Paint()
           ..color = element.color
           ..strokeWidth = element.strokeWidth
@@ -999,18 +1230,33 @@ class DrawingPainter extends CustomPainter {
           ..strokeCap = StrokeCap.round;
         canvas.drawLine(element.start, element.end, paint);
       } else if (element is DrawnRectangle) {
-        final paint = Paint()
-          ..color = element.color
-          ..strokeWidth = element.strokeWidth
-          ..style = PaintingStyle.stroke;
         final rect = Rect.fromPoints(element.topLeft, element.bottomRight);
-        canvas.drawRect(rect, paint);
-      } else if (element is DrawnCircle) {
-        final paint = Paint()
+        
+        if (element.fillColor != Colors.transparent) {
+          final fillPaint = Paint()
+            ..color = element.fillColor
+            ..style = PaintingStyle.fill;
+          canvas.drawRect(rect, fillPaint);
+        }
+        
+        final strokePaint = Paint()
           ..color = element.color
           ..strokeWidth = element.strokeWidth
           ..style = PaintingStyle.stroke;
-        canvas.drawCircle(element.center, element.radius, paint);
+        canvas.drawRect(rect, strokePaint);
+      } else if (element is DrawnCircle) {
+        if (element.fillColor != Colors.transparent) {
+          final fillPaint = Paint()
+            ..color = element.fillColor
+            ..style = PaintingStyle.fill;
+          canvas.drawCircle(element.center, element.radius, fillPaint);
+        }
+        
+        final strokePaint = Paint()
+          ..color = element.color
+          ..strokeWidth = element.strokeWidth
+          ..style = PaintingStyle.stroke;
+        canvas.drawCircle(element.center, element.radius, strokePaint);
       } else if (element is DrawnText) {
         final textPainter = TextPainter(
           text: TextSpan(
@@ -1027,6 +1273,7 @@ class DrawingPainter extends CustomPainter {
         textPainter.paint(canvas, element.position);
       }
     }
+    
     if (previewStart != null && previewEnd != null) {
       final paint = Paint()
         ..color = currentColor.withOpacity(0.7)

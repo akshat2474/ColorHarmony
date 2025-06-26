@@ -1855,7 +1855,7 @@ class OptimizedFightingCanvasPainter extends CustomPainter {
     }
   }
 
-  void _drawFightingEffects(Canvas canvas, Size size) {
+    void _drawFightingEffects(Canvas canvas, Size size) {
     final centerX = size.width / 2;
     
     if (fightProgress > 0.2 && fightProgress < 0.6) {
@@ -1974,4 +1974,5 @@ class OptimizedFightingCanvasPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
+
 
