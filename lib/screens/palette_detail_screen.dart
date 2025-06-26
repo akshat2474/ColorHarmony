@@ -456,7 +456,6 @@ class _PaletteDetailScreenState extends State<PaletteDetailScreen>
           ),
           child: Stack(
             children: [
-              // Header
               Container(
                 height: 40,
                 decoration: BoxDecoration(
@@ -475,7 +474,6 @@ class _PaletteDetailScreenState extends State<PaletteDetailScreen>
                   ),
                 ),
               ),
-              // Content
               Positioned(
                 top: 50,
                 left: 16,

@@ -66,7 +66,6 @@ class _ColorPickerScreenState extends State<ColorPickerScreen>
       ),
       body: Column(
         children: [
-          // Color preview
           Container(
             width: double.infinity,
             height: 100,
@@ -94,8 +93,6 @@ class _ColorPickerScreenState extends State<ColorPickerScreen>
               ),
             ),
           ),
-          
-          // Color picker tabs
           Expanded(
             child: TabBarView(
               controller: _tabController,

@@ -28,7 +28,7 @@ class DrawingPadScreen extends StatefulWidget {
 }
 
 class _DrawingPadScreenState extends State<DrawingPadScreen> {
-  List<DrawnElement> _elements = [];
+  final List<DrawnElement> _elements = [];
   Color _selectedColor = Colors.black;
   double _strokeWidth = 3.0;
   List<Color> _availableColors = [];
@@ -57,7 +57,7 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
     'Impact',
   ];
 
-  GlobalKey _canvasKey = GlobalKey();
+  final GlobalKey _canvasKey = GlobalKey();
 
   @override
   void initState() {
@@ -153,7 +153,6 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
       ),
       child: Column(
         children: [
-          // Tool selection
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
@@ -263,7 +262,6 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
       ),
       child: Row(
         children: [
-          // Font selector
           Expanded(
             flex: 2,
             child: DropdownButton<String>(
@@ -345,7 +343,6 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
         },
         onPanStart: (details) {
           if (_selectedTool == DrawingTool.text) {
-            // Check if user tapped on a text element to drag it
             for (final element in _elements.reversed) {
               if (element is DrawnText) {
                 final distance = (details.localPosition - element.position).distance;
@@ -373,7 +370,6 @@ class _DrawingPadScreenState extends State<DrawingPadScreen> {
         },
         onPanUpdate: (details) {
           if (_draggingText != null) {
-            // Handle text dragging
             setState(() {
               final newPos = details.localPosition - _dragStartOffset!;
               final index = _elements.indexOf(_draggingText!);

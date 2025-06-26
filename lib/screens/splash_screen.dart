@@ -127,7 +127,6 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Animated Color Wheel
               AnimatedBuilder(
                 animation: Listenable.merge([
                   _scaleAnimation, 
@@ -178,8 +177,6 @@ class _SplashScreenState extends State<SplashScreen>
               ),
               
               const SizedBox(height: 40),
-              
-              // Animated Title
               AnimatedTextKit(
                 animatedTexts: [
                   TypewriterAnimatedText(

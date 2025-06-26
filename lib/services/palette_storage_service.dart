@@ -15,12 +15,10 @@ class PaletteStorageService {
         try {
           return ColorPalette.fromJson(jsonDecode(json));
         } catch (e) {
-          print('Error parsing palette: $e');
           return null;
         }
       }).where((palette) => palette != null).cast<ColorPalette>().toList();
     } catch (e) {
-      print('Error getting saved palettes: $e');
       return [];
     }
   }
@@ -70,7 +68,6 @@ class PaletteStorageService {
       final prefs = await SharedPreferences.getInstance();
       return prefs.getStringList(_favoritesKey) ?? [];
     } catch (e) {
-      print('Error getting favorites: $e');
       return [];
     }
   }
