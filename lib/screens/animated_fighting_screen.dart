@@ -1975,4 +1975,3 @@ class OptimizedFightingCanvasPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-
