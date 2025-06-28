@@ -6,7 +6,7 @@
 ## Screenshots
 <div align="center">
 <img src="screenshots/home_screen.png" width="200"> 
-<img src="screenshots/animated_fight.png" width="200"> 
+<img src="screenshots/pokemon.png" width="200"> 
 <img src="screenshots/pattern_creator.png" width="200" >
 <img src="screenshots/extracted_colors.png" width="200" > 
 </div>
