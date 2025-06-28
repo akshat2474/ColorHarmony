@@ -29,9 +29,7 @@ dependencies:
   bonfire: ^3.8.0
   flame: ^1.18.0
   flame_audio: ^2.1.0
-  flutter_animate: ^4.5.0
-
-  
+  flutter_animate: ^4.5.0 
 
 dev_dependencies:
   flutter_test:
@@ -41,16 +39,15 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/battle_bg.png
+    - assets/svg/charmander.svg
+    - assets/svg/squirtle.svg
 
 flutter_icons:
   android: true
   ios: true
   image_path: "assets/icon/app_icon.png"
   min_sdk_android: 21
-
-  flutter:
-  assets:
-    - assets/images/
-    - assets/audio/
-    - assets/sprites/
+  
 

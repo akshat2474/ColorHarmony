@@ -13,7 +13,7 @@ import 'palette_detail_screen.dart';
 import 'drawing_pad_screen.dart';
 import 'pattern_creator_screen.dart';
 import 'image_color_extractor_screen.dart';
-import 'animated_fighting_screen.dart';
+import 'battle_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -1255,16 +1255,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         'onTap': _viewPaletteDetails,
       },
       {
-        'title': 'Fighting Arena',
-        'subtitle': 'Animate epic color battles',
+        'title': 'Pokemon',
+        'subtitle': 'Try beta version of my next app',
         'icon': Icons.sports_mma,
         'color': Colors.deepOrange,
         'onTap': () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => AnimatedFightingScreen(
-              initialColors: _generatedColors,
-            ),
+            builder: (context) => const PokemonBattleScreen(),
           ),
         ),
       },
