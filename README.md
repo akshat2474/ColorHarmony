@@ -1,7 +1,7 @@
 # Color Harmony 🎨
 
-🌐 : [Website Link](https://color-harmony-akshat.netlify.app/)  
-📲 : [App Download Link](https://github.com/akshat2474/ColorHarmony/releases/download/v3.0.0/colorHarmony.apk)
+🌐 : [Website Link](https://colorharmony-akshat.netlify.app/)  
+📲 : [App Download Link](https://github.com/akshat2474/ColorHarmony/releases/download/v4.0.0/final-release.apk)
 
 ## Screenshots
 <div align="center">
