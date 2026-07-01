@@ -1,118 +1,35 @@
-# Color Harmony 🎨
+# Color Harmony
 
-🌐 : [Website Link](https://colorharmony-akshat.netlify.app/)  
-📲 : [App Download Link](https://github.com/akshat2474/ColorHarmony/releases/download/v4.0.0/final-release.apk)
+Welcome to Color Harmony. I built this project to provide a more dynamic and engaging alternative to standard color palette tools. Recently overhauled with a Neo-Brutalist aesthetic—featuring thick borders, stark contrast, and bold colors—it serves as a creative utility for designers, artists, and developers.
 
-## Screenshots
-<div align="center">
-<img src="screenshots/home_screen.png" width="200"> 
-<img src="screenshots/pokemon.png" width="200"> 
-<img src="screenshots/pattern_creator.png" width="200" >
-<img src="screenshots/extracted_colors.png" width="200" > 
-</div>
+Live deployment: [colorharmony-eight.vercel.app](https://colorharmony-eight.vercel.app/)  
 
-## Installation
+---
 
-### Prerequisites
-- Flutter SDK (3.10.0 or higher)
-- Dart SDK (3.0.0 or higher)
-- Android Studio / VS Code
+## Features
 
-### Setup
-```bash
-git clone https://github.com/akshat2474/ColorHarmony
-cd color_harmony
-flutter pub get
-flutter run
-```
+Color Harmony goes beyond basic color picking. Here is a breakdown of the core features:
 
-## Project Structure
+### Palette Generation & Extraction
+- **Color Wheels & Harmonies:** Select a base color and generate mathematically accurate palettes, including Analogous, Complementary, and Triadic sets.
+- **Image Extraction:** Upload a photograph to instantly extract its dominant color palette.
+- **Library Management:** Save and organize your favorite palettes locally, complete with HEX and RGB codes for quick reference.
 
-```
-lib/
-├── main.dart                          
-├── models/                            
-│   ├── color_palette.dart            
-│   ├── color_harmony.dart             
-│   └── accessibility_result.dart     
-├── screens/               
-│   ├── home_screen.dart              
-│   ├── drawing_pad_screen.dart        
-│   ├── pattern_creator_screen.dart
-│   ├── animated_fighting_screen.dart  
-│   ├── image_color_extractor_screen.dart 
-│   ├── palette_generator_screen.dart  
-│   ├── palette_detail_screen.dart    
-│   ├── saved_palettes_screen.dart 
-│   └── accessibility_checker_screen.dart
-├── widgets/                        
-│   ├── color_wheel.dart             
-│   ├── color_swatch.dart             
-│   ├── palette_card.dart            
-│   └── harmony_selector.dart         
-├── services/                  
-│   ├── color_service.dart            
-│   ├── palette_storage_service.dart   
-│   └── accessibility_service.dart    
-└── utils/                            
-    ├── color_utils.dart              
-    ├── constants.dart             
-    └── theme.dart          
-```
+### Generative Pattern Creator
+This tool functions as a generative art studio rather than a standard tiling generator:
+- **Memphis (Geometric):** Dynamic scattering of geometric primitives.
+- **Waves (Organic):** Overlapping, phase-shifting sine waves.
+- **Tartan (Grid):** Sliding interlocking bands designed to mimic woven fabrics.
+- **Mandala (Radial):** Mathematically driven, multi-layered spirographs.
+Patterns can be saved directly to your device gallery.
 
-## Key Dependencies
+### Drawing Pad
+A built-in digital canvas allowing you to sketch ideas using your custom palettes. It includes customizable brush strokes, an eraser, and text tools.
 
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  flutter_colorpicker: ^1.0.3         
-  shared_preferences: ^2.2.2          
-  flutter_staggered_animations: ^1.1.1 
-  gal: ^2.3.0                          
-  image_picker: ^1.0.4                 
-  palette_generator: ^0.3.3+3         
-  path_provider: ^2.1.1               
-  share_plus: ^7.2.1                  
-  google_fonts: ^6.1.0                
-```
+### Accessibility Testing
+The app features a built-in contrast checker that verifies color combinations against standard WCAG AA and AAA compliance metrics, helping you ensure your designs are accessible.
 
-## Usage Guide
 
-### Creating Your First Palette
-1. **Launch the app** - Experience the animated home screen
-2. **Select a base color** - Use the interactive color wheel
-3. **Choose harmony type** - Pick from 6 different algorithms
-4. **View generated palette** - See colors with hex codes instantly
-5. **Fine-tune colors** - Use advanced editing tools
-6. **Save your work** - Store palettes for future reference
 
-### Drawing & Creative Features
-- **Drawing Pad**: Create digital art with brushes, shapes, and text tools
-- **Pattern Creator**: Generate seamless patterns for design projects
-- **Fighting Arena**: Draw custom fighters and watch animated battles
-- **Color Extraction**: Import photos and extract dominant colors
-
-### Professional Tools
-- **Accessibility Testing**: Ensure WCAG compliance with contrast analysis
-- **Palette Management**: Organize and search your color collections
-- **Export Options**: Save to gallery or share with design teams
-
-## Accessibility Features
-
-- **WCAG AA/AAA Compliance** - Test color combinations against web standards
-- **Contrast Ratio Calculator** - Real-time accessibility analysis
-- **Color Blind Friendly** - Ensure designs work for all users
-- **Professional Recommendations** - Intelligent suggestions for better accessibility
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Author
-
-**Akshat Singh**
-- GitHub: [@akshat2474](https://github.com/akshat2474)
-- Email: akshatsingh2474@gmail.com
 
 
